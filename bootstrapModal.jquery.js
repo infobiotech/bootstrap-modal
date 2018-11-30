@@ -71,8 +71,11 @@
                 dismissLabel: 'Ok',
                 autodismiss: false,
                 autodismissLabel: 'Autodismiss',
-                action: {},
+                actions: {},
                 callback: null,
+                endlessProgressBar: false,
+                verticallyCentered: false,
+                large: false,
                 countdown: 3, // seconds
                 debug: false
             };
@@ -194,7 +197,9 @@
                      *
                      * @type $
                      */
-                    var $modalFooter = $(document.createElement('div'));
+                    if (___checkType(options.actions) !== 'boolean') {
+                        var $modalFooter = $(document.createElement('div'));
+                    }
                     /*
                      *
                      * @returns {Function}
@@ -219,7 +224,9 @@
                 /*
                  * modalFooter
                  */
-                $modalFooter.addClass('modal-footer');
+                if (___checkType(options.actions) !== 'boolean') {
+                    $modalFooter.addClass('modal-footer');
+                }
                 /*
                  * modalTitle
                  */
@@ -249,12 +256,14 @@
                     /*
                      *
                      */
-                    $modalFooterDismisser.attr('type', 'button');
-                    $modalFooterDismisser.addClass('btn');
-                    $modalFooterDismisser.addClass('btn-light');
-                    $modalFooterDismisser.attr('data-dismiss', 'modal');
-                    $modalFooterDismisser.html(options.dismissLabel);
-                    $modalFooter.append($modalFooterDismisser);
+                    if (___checkType(options.actions) !== 'boolean') {
+                        $modalFooterDismisser.attr('type', 'button');
+                        $modalFooterDismisser.addClass('btn');
+                        $modalFooterDismisser.addClass('btn-light');
+                        $modalFooterDismisser.attr('data-dismiss', 'modal');
+                        $modalFooterDismisser.html(options.dismissLabel);
+                        $modalFooter.append($modalFooterDismisser);
+                    }
                     /*
                      *
                      */
@@ -276,20 +285,15 @@
                 /*
                  * actions
                  */
-                if (___checkType(options.action) === 'object') {
-                    ___addAction(options.action);
+                if (___checkType(options.actions) === 'object') {
+                    ___addAction(options.actions);
                 } else {
-                    if (___checkType(options.action) === 'array') {
-                        for (var i = 0; i < options.action.length; i++) {
-                            ___addAction(options.action[i]);
+                    if (___checkType(options.actions) === 'array') {
+                        for (var i = 0; i < options.actions.length; i++) {
+                            ___addAction(options.actions[i]);
                         }
                     }
                 }
-                /*
-                 *
-                 */
-                $modalContent.addClass('modal-content');
-                $modalContent.append($modalHeader);
                 /*
                  * modalBody
                  */
@@ -304,16 +308,49 @@
                     }
                 }
                 /*
+                 * endlessProgressBar
+                 */
+                if (___checkType(options.endlessProgressBar) === 'boolean' && options.endlessProgressBar === true) {
+                    var $endlessProgressBarContainer = $(document.createElement('div'));
+                    $endlessProgressBarContainer.addClass('progress');
+                    $endlessProgressBarContainer.addClass('mb-0');
+                    $endlessProgressBarContainer.addClass('pb-0');
+                    var $endlessProgressBar = $(document.createElement('div'));
+                    $endlessProgressBar.addClass('progress-bar');
+                    $endlessProgressBar.addClass('progress-bar-striped');
+                    $endlessProgressBar.addClass('progress-bar-animated');
+                    $endlessProgressBar.addClass('mb-0');
+                    $endlessProgressBar.addClass('pb-0');
+                    $endlessProgressBar.attr('role', 'progressbar');
+                    $endlessProgressBar.width('100%');
+                    $endlessProgressBar.attr('aria-valuenow', '100');
+                    $endlessProgressBar.attr('aria-valuemin', '0');
+                    $endlessProgressBar.attr('aria-valuemax', '100');
+                    $endlessProgressBarContainer.append($endlessProgressBar);
+                    $modalBody.append($endlessProgressBarContainer);
+                }
+                /*
                  *
                  */
-                $modalContent.append($modalHeader);
+                $modalContent.addClass('modal-content');
+                if (___checkType(options.dismiss) === 'boolean' && options.dismiss === true && options.title !== '') {
+                    $modalContent.append($modalHeader);
+                }
                 $modalContent.append($modalBody);
-                $modalContent.append($modalFooter);
+                if (___checkType(options.actions) !== 'boolean') {
+                    $modalContent.append($modalFooter);
+                }
                 /*
                  * modalDialog
                  */
                 $modalDialog.attr('role', 'document');
                 $modalDialog.addClass('modal-dialog');
+                if (___checkType(options.verticallyCentered) === 'boolean' && options.verticallyCentered === true) {
+                    $modalDialog.addClass('modal-dialog-centered');
+                }
+                if (___checkType(options.large) === 'boolean' && options.large === true) {
+                    $modalDialog.addClass('modal-lg');
+                }
                 $modalDialog.append($modalContent);
                 /*
                  * modal
@@ -342,11 +379,13 @@
                             );
 
                     if (___checkType(options.dismiss) === 'boolean' && options.dismiss === false) {
-                        $modalFooterDismisser.attr('href', '#');
-                        $modalFooterDismisser.attr('disabled', 'disabled');
-                        $modalFooterDismisser.addClass('btn');
-                        $modalFooterDismisser.unbind('click');
-                        $modalFooter.append($modalFooterDismisser);
+                        if (___checkType(options.actions) !== 'boolean') {
+                            $modalFooterDismisser.attr('href', '#');
+                            $modalFooterDismisser.attr('disabled', 'disabled');
+                            $modalFooterDismisser.addClass('btn');
+                            $modalFooterDismisser.unbind('click');
+                            $modalFooter.append($modalFooterDismisser);
+                        }
                     }
                     /*
                      *
@@ -465,7 +504,9 @@
                         /*
                          *
                          */
-                        $modalFooter.append($modalAction);
+                        if (___checkType(options.actions) !== 'boolean') {
+                            $modalFooter.append($modalAction);
+                        }
                     }
                     return;
                 }

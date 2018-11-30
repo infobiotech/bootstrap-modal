@@ -1,10 +1,10 @@
 /*!
  * bootstrapModal
- * Version: 0.0.1
+ * Version: 2.0.0-beta
  *
  * Dual licensed under the MIT and GPL licenses.
  *
- * Copyright (c) 2012 Alessandro Raffa <contact@alessandroraffa.eu>
+ * Copyright (c) 2012-2018 Alessandro Raffa <contact@alessandroraffa.eu>
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -30,324 +30,457 @@
  * @see http://opensource.org/licenses/mit-license.php
  * @see http://www.gnu.org/licenses/gpl.html
  *
- * Requires: jQuery v1.8.0 or later, Twitter Bootstrap v2.2.1 or later
+ * Requires: jQuery v3.3, Twitter Bootstrap v4.1
  */
-
 /**
  * bootstrapModal
  * @author  Alessandro Raffa <contact@alessandroraffa.eu>
  * @todo    write clear documentation ;-)
  * @todo    improove performance
  * @todo    cross-browser compatibility
+ * @param {type} $
+ * @returns {undefined}
  */
-(function($){
-  $.fn.extend({
-    bootstrapModal: function(options){
-
-      /**
-       * Stores the version
-       */
-      var _version = '0.0.1';
-
-      // @todo  check minimum required versions of jquery and bootstrap
-
-      // default options
-      var defaults = {
-        title:          '',
-        title_style:    '',
-        body:           '',
-        dismiss:        true,
-        dismiss_label:  'Ok',
-        autodismiss:    false,
-        action:         {},
-        callback:       null,
-        countdown:      3,      // seconds
-        debug:          false
-      }
-
-      /**
-       * @see     http://javascriptweblog.wordpress.com/2011/08/08/fixing-the-javascript-typeof-operator/
-       */
-      var ___checkType = function(obj) {
-        return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
-      }
-
-      //
-      switch ( ___checkType(options) ) {
-
-        case 'string':
-
-          switch (options) {
-            case 'version':
-              return _version;
-              break;
-            default:
-              return null;
-              break;
-          }
-
-          break;
-
-        case 'null':
-        case 'object':
-
-          // reading current options
-          var options = $.extend(defaults, options);
-
-          var counter = null;
-
-          var countdown = options.countdown;
-
-          var title_styles = ['warning','error','info','success'];
-
-          var action_styles = ['warning','danger','info','success','primary','inverse'];
-
-          var _modal = $(document.createElement('div'));
-          var _modal_header = $(document.createElement('div'));
-          var _modal_header_dismisser = $(document.createElement('button'));
-          var _modal_header_title = $(document.createElement('h3'));
-          var _modal_body = $(document.createElement('div'));
-          var _modal_footer = $(document.createElement('div'));
-          var _modal_footer_dismisser = $(document.createElement('a'));
-
-          ___run();
-
-          break;
-
-        default:
-
-          return null;
-
-          break;
-
-      }
-
-      /**
-       *
-       */
-      function ___run() {
-
-        // destroy other bootstrap modal eventually active
-        ___destroy($('div.modal.bootstrap-modal'));
-
-        _modal.addClass('modal');
-        _modal.addClass('bootstrap-modal');
-
-        _modal_header.addClass('modal-header');
-
-        _modal_footer.addClass('modal-footer');
-
-        _modal_body.addClass('modal-body');
-
-        if ( ___checkType( options.body ) == 'object' && body instanceof jQuery ) {
-          _modal_body.append(options.body);
-        }
-        else {
-          if ( ___checkType( options.body ) == 'string' ) {
-            _modal_body.html(options.body);
-          }
-          else {
-            _modal_body.html(defaults.body);
-          }
-        }
-
-        if ( ___checkType(options.dismiss) == 'boolean' && options.dismiss === true ) {
-
-          _modal_header_dismisser.attr('type','button');
-          _modal_header_dismisser.attr('data-dismiss','modal');
-          _modal_header_dismisser.attr('aria-hidden','true');
-          _modal_header_dismisser.html('&times;');
-          _modal_header_dismisser.addClass('close');
-
-          _modal_footer_dismisser.attr('href','#');
-          _modal_footer_dismisser.attr('data-dismiss','modal');
-          _modal_footer_dismisser.html(options.dismiss_label);
-          _modal_footer_dismisser.addClass('btn');
-
-          _modal_header.append(_modal_header_dismisser);
-          _modal_footer.append(_modal_footer_dismisser);
-
-          _modal.modal({
-            show:false,
-            backdrop:true,
-            keyboard:true
-          });
-
-        }
-        else {
-
-          _modal.modal({
-            show:false,
-            backdrop:'static',
-            keyboard:false
-          });
-
-        }
-
-        if ( ___checkType(options.title) == 'string' ) {
-          _modal_header_title.html(options.title);
-        }
-        else {
-          _modal_header_title.html(defaults.title);
-        }
-
-        if ( jQuery.inArray(options.title_style, title_styles) >= 0 ) {
-          _modal_header_title.addClass('text-'+options.title_style);
-        }
-
-        if ( ___checkType(options.action) == 'object' ) {
-          ___addAction(options.action);
-        }
-        else {
-          if ( ___checkType(options.action) == 'array' ) {
-            for ( var i = 0; i < options.action.length; i++ ) {
-              ___addAction(options.action[i]);
+(function ($) {
+    /*
+     *
+     */
+    $.fn.extend({
+        /*
+         *
+         * @param {type} options
+         * @returns {String}
+         */
+        bootstrapModal: function (options) {
+            /**
+             * Stores the version
+             */
+            var _version = '2.0.0-beta';
+            /*
+             * @todo  check minimum required versions of jquery and bootstrap
+             */
+            /*
+             *
+             * @type Object
+             */
+            var defaults = {
+                title: '',
+                titleStyle: '',
+                body: '',
+                dismiss: true,
+                dismissLabel: 'Ok',
+                autodismiss: false,
+                autodismissLabel: 'Autodismiss',
+                action: {},
+                callback: null,
+                countdown: 3, // seconds
+                debug: false
+            };
+            /*
+             *
+             * @param {type} obj
+             * @returns {unresolved}
+             * @see     http://javascriptweblog.wordpress.com/2011/08/08/fixing-the-javascript-typeof-operator/
+             */
+            var ___checkType = function (obj) {
+                return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
+            };
+            /*
+             *
+             * @type Object
+             */
+            switch (___checkType(options)) {
+                case 'string':
+                    switch (options) {
+                        case 'version':
+                            return _version;
+                            break;
+                        default:
+                            return null;
+                            break;
+                    }
+                    break;
+                case 'null':
+                case 'object':
+                    /**
+                     *
+                     * @type Object
+                     */
+                    var options = $.extend(defaults, options);
+                    /**
+                     *
+                     * @type type
+                     */
+                    var counter = null;
+                    /**
+                     *
+                     * @type Number|.$@call;extend.countdown
+                     */
+                    var countdown = options.countdown;
+                    /**
+                     *
+                     * @type Array
+                     */
+                    var titleStyles = ['warning', 'error', 'info', 'success'];
+                    /**
+                     *
+                     * @type Number
+                     */
+                    var actionsCounter = 0;
+                    /*
+                     *
+                     * @type Array
+                     */
+                    var _actionStyles = [
+                        'primary',
+                        'secondary',
+                        'success',
+                        'danger',
+                        'warning',
+                        'info',
+                        'light',
+                        'dark',
+                        'outline-primary',
+                        'outline-secondary',
+                        'outline-success',
+                        'outline-danger',
+                        'outline-warning',
+                        'outline-info',
+                        'outline-light',
+                        'outline-dark',
+                        'link'
+                    ];
+                    /*
+                     *
+                     * @type $
+                     */
+                    var $modal = $(document.createElement('div'));
+                    /*
+                     *
+                     * @type $
+                     */
+                    var $modalDialog = $(document.createElement('div'));
+                    /*
+                     *
+                     * @type $
+                     */
+                    var $modalContent = $(document.createElement('div'));
+                    /*
+                     *
+                     * @type $
+                     */
+                    var $modalHeader = $(document.createElement('div'));
+                    /*
+                     *
+                     * @type $
+                     */
+                    var $modalTitle = $(document.createElement('h5'));
+                    /*
+                     *
+                     * @type $
+                     */
+                    var $modalDismisser = $(document.createElement('button'));
+                    /*
+                     *
+                     * @type $
+                     */
+                    var $modalFooterDismisser = $(document.createElement('button'));
+                    /*
+                     *
+                     * @type $
+                     */
+                    var $modalBody = $(document.createElement('div'));
+                    /*
+                     *
+                     * @type $
+                     */
+                    var $modalFooter = $(document.createElement('div'));
+                    /*
+                     *
+                     * @returns {Function}
+                     */
+                    ___run();
+                    break;
+                default:
+                    /*
+                     *
+                     * @returns {Function}
+                     */
+                    return null;
+                    break;
             }
-          }
-        }
-
-        _modal_header.append(_modal_header_title);
-
-        _modal.append(_modal_header);
-        _modal.append(_modal_body);
-        _modal.append(_modal_footer);
-
-        _modal.modal({show:true});
-
-        if ( ___checkType(options.autodismiss) == 'boolean' && options.autodismiss === true ) {
-
-          // countdown = 3; // @todo set up a default countdown variable, configurable via options
-
-          setTimeout(
-            function(){
-              ___destroy(_modal);
-              if ( ___checkType(options.callback) == 'function' ) {
-                options.callback();
-              }
-            },
-            countdown*1000
-          );
-
-          if ( ___checkType(options.dismiss) == 'boolean' && options.dismiss === false ) {
-            _modal_footer_dismisser.attr('href','#');
-            _modal_footer_dismisser.attr('disabled','disabled');
-            _modal_footer_dismisser.addClass('btn');
-            _modal_footer_dismisser.unbind('click');
-            _modal_footer.append(_modal_footer_dismisser);
-          }
-
-          _modal_footer_dismisser.html(
-            'Autodismiss ('+countdown+')'
-          );
-
-          counter = setInterval(function(){___timer();},1000);
-
-        }
-        else {
-
-          if ( ___checkType(options.callback) == 'function' ) {
-
-            _modal.unbind('hidden');
-
-            _modal.on('hidden',function(){
-              options.callback();
-              _modal.unbind('hidden');
-              _modal.on('hidden',function(){ ___destroy(_modal); });
-            });
-
-          }
-          else {
-
-            _modal.unbind('hidden');
-            _modal.on('hidden',function(){ ___destroy(_modal); });
-
-          }
-
-        }
-
-        return function(){};
-
-      }
-
-      /**
-       *
-       */
-      function ___timer() {
-        countdown = countdown - 1;
-        if ( countdown <= 0 ) {
-          clearInterval(counter);
-          return;
-        }
-        _modal_footer_dismisser.html('Autodismiss ('+countdown+')');
-      }
-
-      /**
-       *
-       */
-      function ___addAction( action ) {
-
-        if ( action == null ) {
-
-          return;
-
-        }
-        else {
-
-          if ( ___checkType(action) == 'object' ) {
-
-            if ( action.label ) {
-
-              var _modal_action = $(document.createElement('a'));
-
-              _modal_action.addClass('btn');
-
-              if ( ___checkType(action.style) == 'string' ) {
-                if ( jQuery.inArray( action.style, action_styles ) >= 0 ) {
-                  _modal_action.addClass('btn-'+action.style);
+            /*
+             *
+             * @returns {Function}
+             */
+            function ___run() {
+                // destroy other bootstrap modals eventually active
+                ___destroy($('div.modal.bootstrap-modal'));
+                /*
+                 * modalFooter
+                 */
+                $modalFooter.addClass('modal-footer');
+                /*
+                 * modalTitle
+                 */
+                if (___checkType(options.title) === 'string') {
+                    $modalTitle.html(options.title);
+                } else {
+                    $modalTitle.html(defaults.title);
                 }
-              }
-
-              _modal_action.html(
-                action.label ? action.label : 'Action'
-              );
-
-              if ( ___checkType(action.callback) === 'function' ) {
-                _modal_action.click(function(){
-                  action.callback();
-                  ___destroy(_modal);
-                });
-              }
-              else {
-                if ( action.href ) {
-                  _modal_action.attr('href',action.href);
+                if (jQuery.inArray(options.titleStyle, titleStyles) >= 0) {
+                    $modalTitle.addClass('text-' + options.titleStyle);
                 }
-                else {
-                  _modal_action.attr('href','#');
-                  _modal_action.attr('data-dismiss','modal');
+                /*
+                 * modalHeader
+                 */
+                $modalHeader.addClass('modal-header');
+                $modalHeader.append($modalTitle);
+                /*
+                 * modalDismisser
+                 */
+                if (___checkType(options.dismiss) === 'boolean' && options.dismiss === true) {
+                    $modalDismisser.attr('type', 'button');
+                    $modalDismisser.addClass('close');
+                    $modalDismisser.attr('data-dismiss', 'modal');
+                    $modalDismisser.attr('aria-label', options.dismissLabel);
+                    $modalDismisser.html('<span aria-hidden="true">&times;</span>');
+                    $modalHeader.append($modalDismisser);
+                    /*
+                     *
+                     */
+                    $modalFooterDismisser.attr('type', 'button');
+                    $modalFooterDismisser.addClass('btn');
+                    $modalFooterDismisser.addClass('btn-light');
+                    $modalFooterDismisser.attr('data-dismiss', 'modal');
+                    $modalFooterDismisser.html(options.dismissLabel);
+                    $modalFooter.append($modalFooterDismisser);
+                    /*
+                     *
+                     */
+                    $modal.modal({
+                        show: false,
+                        backdrop: true,
+                        keyboard: true
+                    });
+                } else {
+                    /*
+                     *
+                     */
+                    $modal.modal({
+                        show: false,
+                        backdrop: 'static',
+                        keyboard: false
+                    });
                 }
-              }
+                /*
+                 * actions
+                 */
+                if (___checkType(options.action) === 'object') {
+                    ___addAction(options.action);
+                } else {
+                    if (___checkType(options.action) === 'array') {
+                        for (var i = 0; i < options.action.length; i++) {
+                            ___addAction(options.action[i]);
+                        }
+                    }
+                }
+                /*
+                 *
+                 */
+                $modalContent.addClass('modal-content');
+                $modalContent.append($modalHeader);
+                /*
+                 * modalBody
+                 */
+                $modalBody.addClass('modal-body');
+                if (___checkType(options.body) === 'object' && options.body instanceof jQuery) {
+                    $modalBody.append(options.body);
+                } else {
+                    if (___checkType(options.body) === 'string') {
+                        $modalBody.html(options.body);
+                    } else {
+                        $modalBody.html(defaults.body);
+                    }
+                }
+                /*
+                 *
+                 */
+                $modalContent.append($modalHeader);
+                $modalContent.append($modalBody);
+                $modalContent.append($modalFooter);
+                /*
+                 * modalDialog
+                 */
+                $modalDialog.attr('role', 'document');
+                $modalDialog.addClass('modal-dialog');
+                $modalDialog.append($modalContent);
+                /*
+                 * modal
+                 */
+                $modal.addClass('modal');
+                $modal.addClass('bootstrap-modal');
+                $modal.attr('tabindex', '-1');
+                $modal.attr('role', 'dialog');
+                $modal.append($modalDialog);
+                /*
+                 * show the modal
+                 */
+                $modal.modal({show: true});
+                /*
+                 * autodismiss and countdown
+                 */
+                if (___checkType(options.autodismiss) === 'boolean' && options.autodismiss === true) {
+                    setTimeout(
+                            function () {
+                                ___destroy($modal);
+                                if (___checkType(options.callback) === 'function') {
+                                    options.callback();
+                                }
+                            },
+                            countdown * 1000
+                            );
 
-              _modal_footer.append(_modal_action);
-
+                    if (___checkType(options.dismiss) === 'boolean' && options.dismiss === false) {
+                        $modalFooterDismisser.attr('href', '#');
+                        $modalFooterDismisser.attr('disabled', 'disabled');
+                        $modalFooterDismisser.addClass('btn');
+                        $modalFooterDismisser.unbind('click');
+                        $modalFooter.append($modalFooterDismisser);
+                    }
+                    /*
+                     *
+                     */
+                    var autodismissLabel = defaults.autodismissLabel;
+                    if (___checkType(options.autodismissLabel) === 'string') {
+                        autodismissLabel = options.autodismissLabel;
+                    }
+                    /*
+                     *
+                     */
+                    $modalFooterDismisser.html(
+                            autodismissLabel + ' (' + countdown + ')'
+                            );
+                    counter = setInterval(function () {
+                        ___timer();
+                    }, 1000);
+                } else {
+                    if (___checkType(options.callback) === 'function') {
+                        $modal.unbind('hidden');
+                        $modal.on('hidden', function () {
+                            options.callback();
+                            $modal.unbind('hidden');
+                            $modal.on('hidden', function () {
+                                ___destroy($modal);
+                            });
+                        });
+                    } else {
+                        $modal.unbind('hidden');
+                        $modal.on('hidden', function () {
+                            ___destroy($modal);
+                        });
+                    }
+                }
+                return function () {};
             }
-
-          }
-
-          return;
-
+            /**
+             *
+             * @returns {undefined}
+             */
+            function ___timer() {
+                /*
+                 *
+                 */
+                countdown = countdown - 1;
+                /*
+                 *
+                 */
+                if (countdown <= 0) {
+                    clearInterval(counter);
+                    return;
+                }
+                /*
+                 *
+                 * @type defaults.autodismissLabel|String|.$@call;extend.autodismissLabel
+                 */
+                var autodismissLabel = defaults.autodismissLabel;
+                if (___checkType(options.autodismissLabel) === 'string') {
+                    autodismissLabel = options.autodismissLabel;
+                }
+                $modalFooterDismisser.html(autodismissLabel + ' (' + countdown + ')');
+                /*
+                 *
+                 */
+            }
+            /**
+             *
+             * @param {type} action
+             * @returns {undefined}
+             */
+            function ___addAction(action) {
+                if (action === null) {
+                    return;
+                } else {
+                    if (___checkType(action) === 'object') {
+                        /**
+                         *
+                         * @type Object
+                         */
+                        var $modalAction;
+                        actionsCounter++;
+                        /*
+                         *
+                         */
+                        if (___checkType(action.callback) === 'function') {
+                            $modalAction = $(document.createElement('button'));
+                            $modalAction.attr('type', 'button');
+                            $modalAction.click(function (event) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                action.callback();
+                                ___destroy($modal);
+                            });
+                        } else {
+                            $modalAction = $(document.createElement('a'));
+                            if (action.href) {
+                                $modalAction.attr('href', action.href);
+                            } else {
+                                $modalAction.attr('href', '#');
+                                $modalAction.attr('data-dismiss', 'modal');
+                            }
+                        }
+                        /*
+                         * btn
+                         */
+                        $modalAction.addClass('btn');
+                        if (___checkType(action.style) === 'string') {
+                            if (jQuery.inArray(action.style, _actionStyles) >= 0) {
+                                $modalAction.addClass('btn-' + action.style);
+                            }
+                        }
+                        /*
+                         *
+                         */
+                        $modalAction.html(action.label ? action.label : ('Action' + actionsCounter));
+                        /*
+                         *
+                         */
+                        $modalFooter.append($modalAction);
+                    }
+                    return;
+                }
+            }
+            /**
+             *
+             * @param {type} $modalElement
+             * @returns {undefined}
+             */
+            function ___destroy($modalElement) {
+                $modalElement.modal('hide');
+                $modalElement.modal({show: false});
+                $modalElement.remove();
+                return;
+            }
         }
-
-      }
-
-      /**
-       *
-       */
-      function ___destroy(modal_element){
-        modal_element.modal('hide');
-        modal_element.modal({show:false});
-        modal_element.remove();
-      }
-
-    }
-  });
+    });
 })(jQuery);

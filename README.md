@@ -6,7 +6,7 @@ bootstrapModal helps you rapidly use <a href="http://twitter.github.com/bootstra
 
 With bootstrapModal you do not need to add any HTML hidden div.
 
-Just include jQuery 1.8 and Bootstrap 2.2.1.
+Just include jQuery 3.3 and Bootstrap 4.1.
 
 Write:
 
@@ -33,7 +33,7 @@ $('#delete-button').click(function(){
         // javascript code for executing the dangerous action...
       }
     },
-    dismiss_label:'Cancel'
+    dismissLabel:'Cancel'
   });
 });
 ```
